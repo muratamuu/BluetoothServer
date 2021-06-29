@@ -33,6 +33,7 @@ private:
       forever {
         auto* socket = server_.nextPendingConnection();
         if (!socket) break;
+        qDebug() << "accept client";
         setupClient(socket);
         clients_.append(socket);
       }
@@ -61,7 +62,7 @@ int main(int argc, char** argv) {
     auto line = socket->readAll();
     qDebug() << "Recv:" << line;
     if (line == "ATZ\r") {
-      socket->write(QString("\r\rELM32 v2.1\r\r>").toUtf8());
+      socket->write(QString("\r\rELM327 v2.1\r\r>").toUtf8());
     } else if (line == "ATE0\r") {
       socket->write(QString("OK\r\r>").toUtf8());
     } else if (line == "ATAL\r") {
