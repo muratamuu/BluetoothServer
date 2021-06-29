@@ -58,7 +58,19 @@ int main(int argc, char** argv) {
 
   BluetoothServer server;
   server.OnRecv = [](auto* socket) {
-    qDebug() << socket->readAll();
+    auto line = socket->readAll();
+    qDebug() << "Recv:" << line;
+    if (line == "ATZ\r") {
+      socket->write(QString("\r\rELM32 v2.1\r\r>").toUtf8());
+    } else if (line == "ATE0\r") {
+      socket->write(QString("OK\r\r>").toUtf8());
+    } else if (line == "ATAL\r") {
+      socket->write(QString("OK\r\r>").toUtf8());
+    } else if (line == "ATSP0\r") {
+      socket->write(QString("OK\r\r>").toUtf8());
+    } else if (line == "ATH1\r") {
+      socket->write(QString("OK\r\r>").toUtf8());
+    }
   };
   server.Listen("00001101-0000-1000-8000-00805F9B34FD", "My Bluetooth Server");
 
