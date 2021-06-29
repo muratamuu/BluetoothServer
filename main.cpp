@@ -32,27 +32,20 @@ private:
     connect(&server_, &QBluetoothServer::newConnection, [this] {
       forever {
         auto* socket = server_.nextPendingConnection();
-        //if (!socket) break;
+        if (!socket) break;
         setupClient(socket);
         clients_.append(socket);
       }
     });
     connect(&server_, static_cast<void(QBluetoothServer::*)(QBluetoothServer::Error)>(&QBluetoothServer::error),
-            [](QBluetoothServer::Error err) {
-      qDebug() << err;
-    });
+        [](QBluetoothServer::Error err) { qDebug() << err; });
   }
 
   void setupClient(QBluetoothSocket* socket) {
-    connect(socket, &QBluetoothSocket::disconnected, [this, socket] { clients_.removeOne(socket); });
     connect(socket, &QBluetoothSocket::readyRead, [this, socket] { OnRecv(socket); });
+    connect(socket, &QBluetoothSocket::disconnected, [this, socket] { clients_.removeOne(socket); });
     connect(socket, QOverload<QBluetoothSocket::SocketError>::of(&QBluetoothSocket::error),
-            [this, socket] (QBluetoothSocket::SocketError err) {
-      if (err == QBluetoothSocket::RemoteHostClosedError)
-        clients_.removeOne(socket);
-      else
-        qDebug() << socket->errorString();
-    });
+        [] (QBluetoothSocket::SocketError err) { qDebug() << err; });
   }
 
   QBluetoothServer server_;
@@ -67,7 +60,7 @@ int main(int argc, char** argv) {
   server.OnRecv = [](auto* socket) {
     qDebug() << socket->readAll();
   };
-  server.Listen("00001101-0000-1000-8000-00805F9B34FD", "Bluetooth Server 2");
+  server.Listen("00001101-0000-1000-8000-00805F9B34FD", "My Bluetooth Server");
 
   qDebug() << "Bluetooth Listen OK";
 
