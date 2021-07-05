@@ -64,13 +64,28 @@ int main(int argc, char** argv) {
     if (line == "ATZ\r") {
       socket->write(QString("\r\rELM327 v2.1\r\r>").toUtf8());
     } else if (line == "ATE0\r") {
-      socket->write(QString("OK\r\r>").toUtf8());
+      socket->write(QString("ATE0\r\rOK\r\r>").toUtf8());
     } else if (line == "ATAL\r") {
       socket->write(QString("OK\r\r>").toUtf8());
     } else if (line == "ATSP0\r") {
       socket->write(QString("OK\r\r>").toUtf8());
     } else if (line == "ATH1\r") {
       socket->write(QString("OK\r\r>").toUtf8());
+    } else if (line == "0111") {  // ACCP
+      static quint8 accp = 0;
+      accp++;
+      auto data = QString("7E8 04 41 11 %1 \r\r>").arg(accp%100, 2, 16, QChar('0')).toUtf8();
+      socket->write(data);
+    } else if (line == "010C") {  // RPM
+      static quint16 rpm = 0;
+      rpm++;
+      auto data = QString("7E8 04 41 0C %1 %2 \r\r>").arg(rpm/256, 2, 16, QChar('0')).arg(rpm%256, 2, 16, QChar('0')).toUtf8();
+      socket->write(data);
+    } else if (line == "010D") {  // SP1
+      static quint8 sp1 = 0;
+      sp1++;
+      auto data = QString("7E8 04 41 0D %1 \r7EA 04 41 0D %2 \r\r>").arg(sp1, 2, 16, QChar('0')).arg(sp1, 2, 16, QChar('0')).toUtf8();
+      socket->write(data);
     }
   };
   server.Listen("00001101-0000-1000-8000-00805F9B34FD", "My Bluetooth Server");
