@@ -2,6 +2,7 @@
 #include <QDebug>
 #include <QBluetoothSocket>
 #include <QBluetoothServer>
+#include <QThread>
 
 class BluetoothServer : public QObject
 {
@@ -71,20 +72,25 @@ int main(int argc, char** argv) {
       socket->write(QString("OK\r\r>").toUtf8());
     } else if (line == "ATH1\r") {
       socket->write(QString("OK\r\r>").toUtf8());
-    } else if (line == "0111") {  // ACCP
+    } else if (line == "0100\r") {
+      socket->write(QString("SEARCHING...\r").toUtf8());
+      QThread::sleep(3);
+      //socket->write(QString("UNABLE TO CONNECT\r\r>").toUtf8());
+      socket->write(QString("7EA 06 41 00 BF BF A8 93 \r7E8 06 41 00 98 3A 80 13 \r\r>").toUtf8());
+    } else if (line == "0111\r") {  // ACCP
       static quint8 accp = 0;
       accp++;
       auto data = QString("7E8 04 41 11 %1 \r\r>").arg(accp%100, 2, 16, QChar('0')).toUtf8();
       socket->write(data);
-    } else if (line == "010C") {  // RPM
+    } else if (line == "010C\r") {  // RPM
       static quint16 rpm = 0;
       rpm++;
       auto data = QString("7E8 04 41 0C %1 %2 \r\r>").arg(rpm/256, 2, 16, QChar('0')).arg(rpm%256, 2, 16, QChar('0')).toUtf8();
       socket->write(data);
-    } else if (line == "010D") {  // SP1
+    } else if (line == "010D\r") {  // SP1
       static quint8 sp1 = 0;
       sp1++;
-      auto data = QString("7E8 04 41 0D %1 \r7EA 04 41 0D %2 \r\r>").arg(sp1, 2, 16, QChar('0')).arg(sp1, 2, 16, QChar('0')).toUtf8();
+      auto data = QString("7E8 03 41 0D %1 \r7EA 03 41 0D %2 \r\r>").arg(sp1, 2, 16, QChar('0')).arg(++sp1, 2, 16, QChar('0')).toUtf8();
       socket->write(data);
     }
   };
